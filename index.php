@@ -1,5 +1,5 @@
 <?php
-
+include_once __DIR__ . '/config/connection.php';
 
 class MainMenu{
     public function run(){
@@ -40,6 +40,7 @@ class MainMenu{
 
     
     private function handlePatients(){
+        global $connection;
         while (true) {
             echo "\n=== Patient Management ===\n";
             echo "1. List all patients\n";
@@ -53,7 +54,12 @@ class MainMenu{
 
             switch ($choice) {
                 case '1':
-                    echo "Displaying list\n";
+                    $stmt = $connection->query("select * from patients");
+                    $patients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    echo "\n=== Patient List ===\n";
+                    foreach ($patients as $patient) {
+                        echo $patient['first_name'] . "   ---   " . $patient['last_name'] . "   ---   " . $patient['gender'] . "   ---   " . $patient['date_of_birth'] . "   ---   " . $patient['email'] . "   ---   " . $patient['address'] . "\n";
+                    }
                     break;
                 case '2':
                     echo "Search\n";
@@ -77,6 +83,7 @@ class MainMenu{
 
     
     private function handleDoctors(){
+        global $connection;
         while (true) {
             echo "\n=== Doctor Management ===\n";
             echo "1. List all doctors\n";
@@ -89,16 +96,38 @@ class MainMenu{
             $choice = $this->prompt("Action");
 
             switch ($choice) {
+                
+                case '1':
+                    $stmt = $connection->query("select * from doctors");
+                    $doctors = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    echo "\n=== Doctors List ===\n";
+                    foreach ($doctors as $doctor) {
+                        echo $doctor['first_name'] . "   ---   " . $doctor['last_name'] . "   ---   " . $doctor['specialization'] . "   ---   " . $doctor['phone_number']  . "   ---   " . $doctor['email'] ."\n";
+                    }
+                    break;
+                case '2':
+                    echo "Search\n";
+                    break;
+                case '3':
+                    echo "Add form\n";
+                    break;
+                case '4':
+                    echo "Edit form\n";
+                    break;
+                case '5':
+                    echo "Deletion\n";
+                    break;
                 case '6':
                     return;
                 default:
-                    echo "Option currently under development.\n";
+                    echo "Invalid choice.\n";
             }
         }
     }
 
     
     private function handleDepartments(){
+        global $connection;
         while (true) {
             echo "\n=== Department Management ===\n";
             echo "1. List departments\n";
@@ -107,8 +136,25 @@ class MainMenu{
 
             $choice = $this->prompt("Action");
 
-            if ($choice === '3') return;
-            echo "Chosen option: $choice\n";
+            switch ($choice) {
+                
+                case '1':
+                    $stmt = $connection->query("select * from departments");
+                    $departments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    echo "\n=== Departments List ===\n";
+                    foreach ($departments as $department) {
+                        echo $department['department_name'] . "   ---   " . $department['location'] ."\n";
+                    }
+                    break;
+                case '2':
+                    echo "Search\n";
+                    break;
+                case '3':
+                    echo "Add form\n";
+                    break;
+                default:
+                    echo "Invalid choice.\n";
+            }
         }
     }
 
