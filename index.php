@@ -1,45 +1,8 @@
 <?php
 include_once __DIR__ . '/config/connection.php';
 
-class MainMenu{
-    public function run(){
-        while (true) {
-            $this->showMainMenu();
-            $choice = $this->prompt("Selection");
-
-            switch ($choice) {
-                case '1':
-                    $this->handlePatients();
-                    break;
-                case '2':
-                    $this->handleDoctors();
-                    break;
-                case '3':
-                    $this->handleDepartments();
-                    break;
-                case '4':
-                    $this->handleStats();
-                    break;
-                case '5':
-                    echo "Closing the program.\n";
-                    exit();
-                default:
-                    echo "Invalid choice.\n";
-            }
-        }
-    }
-
-    private function showMainMenu(){
-        echo "\n=== Unity Care CLI ===\n";
-        echo "1. Manage patients\n";
-        echo "2. Manage doctors\n";
-        echo "3. Manage departments\n";
-        echo "4. Statistics\n";
-        echo "5. Quit\n";
-    }
-
-    
-    private function handlePatients(){
+class Patient_m {
+    public function handlePatients() {
         global $connection;
         while (true) {
             echo "\n=== Patient Management ===\n";
@@ -81,8 +44,14 @@ class MainMenu{
         }
     }
 
-    
-    private function handleDoctors(){
+    private function prompt($label) {
+        echo "$label : ";
+        return trim(fgets(STDIN));
+    }
+}
+
+class Doctor_m {
+    public function handleDoctors() {
         global $connection;
         while (true) {
             echo "\n=== Doctor Management ===\n";
@@ -96,7 +65,6 @@ class MainMenu{
             $choice = $this->prompt("Action");
 
             switch ($choice) {
-                
                 case '1':
                     $stmt = $connection->query("select * from doctors");
                     $doctors = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -125,8 +93,14 @@ class MainMenu{
         }
     }
 
-    
-    private function handleDepartments(){
+    private function prompt($label) {
+        echo "$label : ";
+        return trim(fgets(STDIN));
+    }
+}
+
+class Department_m {
+    public function handleDepartments() {
         global $connection;
         while (true) {
             echo "\n=== Department Management ===\n";
@@ -137,7 +111,6 @@ class MainMenu{
             $choice = $this->prompt("Action");
 
             switch ($choice) {
-                
                 case '1':
                     $stmt = $connection->query("select * from departments");
                     $departments = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -147,27 +120,64 @@ class MainMenu{
                     }
                     break;
                 case '2':
-                    echo "Search\n";
+                    echo "Add a department\n";
                     break;
                 case '3':
-                    echo "Add form\n";
-                    break;
+                    return;
                 default:
                     echo "Invalid choice.\n";
             }
         }
     }
 
-    
-    private function handleStats(){
-        echo "\n=== Global Statistics ===\n";
-        echo "Average patient age\n";
-        echo "Average doctor seniority\n";
-        echo "Most populated department\n";
-        }
+    private function prompt($label) {
+        echo "$label : ";
+        return trim(fgets(STDIN));
+    }
+}
 
-    
-    private function prompt($label)  {
+
+
+class MainMenu {
+    public function run() {
+        while (true) {
+            $this->showMainMenu();
+            $choice = $this->prompt("Selection");
+
+            switch ($choice) {
+                case '1':
+                    $patient_m = new Patient_m();
+                    $patient_m->handlePatients();
+                    break;
+                case '2':
+                    $doctor_m = new Doctor_m();
+                    $doctor_m->handleDoctors();
+                    break;
+                case '3':
+                    $department_m = new Department_m();
+                    $department_m->handleDepartments();
+                    break;
+                case '4':
+                    break;
+                case '5':
+                    echo "Closing the program.\n";
+                    exit();
+                default:
+                    echo "Invalid choice.\n";
+            }
+        }
+    }
+
+    private function showMainMenu() {
+        echo "\n=== Unity Care CLI ===\n";
+        echo "1. Manage patients\n";
+        echo "2. Manage doctors\n";
+        echo "3. Manage departments\n";
+        echo "4. Statistics\n";
+        echo "5. Quit\n";
+    }
+
+    private function prompt($label) {
         echo "$label : ";
         return trim(fgets(STDIN));
     }
