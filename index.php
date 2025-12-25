@@ -1,6 +1,33 @@
 <?php
 include_once __DIR__ . '/config/connection.php';
 
+class Test {
+    public static function validateString($str, $regex = null) {
+        $trimmed = trim($str);
+        if (empty($trimmed)) {
+            return false;
+        }
+        if ($regex !== null && !preg_match($regex, $trimmed)) {
+            return false;
+        }
+        return true;
+    }
+
+    public static function validateEmail($email) {
+        return filter_var($email, FILTER_VALIDATE_EMAIL);
+    }
+
+    public static function validateDate($date, $format = 'Y-m-d') {
+        $d = DateTime::createFromFormat($format, $date);
+        return $d && $d->format($format) === $date;
+    }
+
+    public static function validateGender($gender) {
+        $valid = ['m', 'f', 'o'];
+        return in_array(strtolower($gender), $valid);
+    }
+}
+
 class Patient_m {
     public function handlePatients() {
         global $connection;
@@ -28,7 +55,40 @@ class Patient_m {
                     echo "Search\n";
                     break;
                 case '3':
-                    echo "Add form\n";
+                    echo "\n--- Add New Patient ---\n";
+                    $fname = $this->prompt("First Name");
+                    $lname = $this->prompt("Last Name");
+                    $gender = $this->prompt("Gender (M : male/ F : female/ O : other)");
+                    $dob = $this->prompt("Date of Birth (YYYY-MM-DD)");
+                    $phone = $this->prompt("Phone Number");
+                    $email = $this->prompt("Email");
+                    $address = $this->prompt("Address");
+
+                    if (!Test::validateString($fname, '/^[a-zA-Z\s]+$/') || !Test::validateString($lname, '/^[a-zA-Z\s]+$/')) {
+                        echo "Names cannot be empty and must only contain letters.\n";
+                        break;
+                    }
+                    if (!Test::validateGender($gender)) {
+                        echo "Invalid gender.\n";
+                        break;
+                    }
+                    if (!Test::validateDate($dob)) {
+                        echo "Invalid date format.\n";
+                        break;
+                    }
+                    if (!Test::validateEmail($email)) {
+                        echo "Invalid email format.\n";
+                        break;
+                    }
+
+                    try {
+                        $sql = "insert into patients (first_name, last_name, gender, date_of_birth, phone_number, email, address) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        $stmt = $connection->prepare($sql);
+                        $stmt->execute([$fname, $lname, strtolower($gender), $dob, $phone, $email, $address]);
+                        echo "Patient added successfully!\n";
+                    } catch (PDOException $err) {
+                        echo "SQL Error: " . $err->getMessage() . "\n";
+                    }
                     break;
                 case '4':
                     echo "Edit form\n";
@@ -77,7 +137,30 @@ class Doctor_m {
                     echo "Search\n";
                     break;
                 case '3':
-                    echo "Add form\n";
+                    echo "\n--- Add New Doctor ---\n";
+                    $fname = $this->prompt("First Name");
+                    $lname = $this->prompt("Last Name");
+                    $spec = $this->prompt("Specialization");
+                    $phone = $this->prompt("Phone Number");
+                    $email = $this->prompt("Email");
+
+                    if (!Test::validateString($fname, '/^[a-zA-Z\s]+$/') || !Test::validateString($lname, '/^[a-zA-Z\s]+$/')) {
+                        echo "Names cannot be empty and must only contain letters.\n";
+                        break;
+                    }
+                    if (!Test::validateEmail($email)) {
+                        echo "Invalid email format.\n";
+                        break;
+                    }
+
+                    try {
+                        $sql = "insert into doctors (first_name, last_name, specialization, phone_number, email) VALUES (?, ?, ?, ?, ?)";
+                        $stmt = $connection->prepare($sql);
+                        $stmt->execute([$fname, $lname, $spec, $phone, $email]);
+                        echo "Doctor added\n";
+                    } catch (PDOException $err) {
+                        echo "SQL Error: " . $err->getMessage() . "\n";
+                    }
                     break;
                 case '4':
                     echo "Edit form\n";
@@ -120,7 +203,23 @@ class Department_m {
                     }
                     break;
                 case '2':
-                    echo "Add a department\n";
+                    echo "\n--- Add New Department ---\n";
+                    $name = $this->prompt("Department Name");
+                    $location = $this->prompt("Location");
+
+                    if (!Test::validateString($name) || !Test::validateString($location)) {
+                        echo "Name and Location cannot be empty.\n";
+                        break;
+                    }
+
+                    try {
+                        $sql = "insert into departments (department_name, location) VALUES (?, ?)";
+                        $stmt = $connection->prepare($sql);
+                        $stmt->execute([$name, $location]);
+                        echo "Department added\n";
+                    } catch (PDOException $err) {
+                        echo "SQL Error: " . $err->getMessage() . "\n";
+                    }
                     break;
                 case '3':
                     return;
