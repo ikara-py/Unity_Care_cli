@@ -1,5 +1,38 @@
 <?php
-include_once __DIR__ . '/config/connection.php';
+require_once __DIR__ . '/vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+class Database
+{
+    private static $connection = null;
+
+    public static function connect()
+    {
+        if (self::$connection === null) {
+            $dotenv = Dotenv::createImmutable(__DIR__);
+            $dotenv->load();
+
+            $dsn = sprintf(
+                "mysql:host=%s;dbname=%s;charset=utf8mb4",
+                $_ENV['db_host'],
+                $_ENV['db_name']
+            );
+
+            try {
+                self::$connection = new PDO(
+                    $dsn,
+                    $_ENV['db_user'],
+                    $_ENV['db_pass'],
+                    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+                );
+            } catch (PDOException $err) {
+                die("Connection failed: " . $err->getMessage());
+            }
+        }
+        return self::$connection;
+    }
+}
 
 class Validation
 {
@@ -46,7 +79,8 @@ class Patients
 {
     public function handlePatients()
     {
-        global $connection;
+        $connection = Database::connect();
+
         while (true) {
             echo "\n=== Patient Management ===\n";
             echo "1. List all patients\n";
@@ -76,7 +110,7 @@ class Patients
                     }
 
                     $gender = Helper::prompt("Gender (male/female)");
-                    $dob = Helper::prompt("Date of Birth (YYYY-MM-DD)");
+                    $dob = Helper::prompt("Date of Birth (YYYY-MM-DD EX:2000-05-03)");
                     $phone = Helper::prompt("Phone Number");
                     $email = Helper::prompt("Email");
                     $address = Helper::prompt("Address");
@@ -95,7 +129,7 @@ class Patients
                     }
 
                     try {
-                        $sql = "INSERT INTO patients (first_name, last_name, gender, date_of_birth, phone_number, email, address) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        $sql = "insert into patients (first_name, last_name, gender, date_of_birth, phone_number, email, address) values (?, ?, ?, ?, ?, ?, ?)";
                         $stmt = $connection->prepare($sql);
                         $stmt->execute([$fname, $lname, strtolower($gender), $dob, $phone, $email, $address]);
                         echo "Patient added successfully!\n";
@@ -119,8 +153,8 @@ class Patients
 
     private function getAll()
     {
-        global $connection;
-        $stmt = $connection->query("SELECT * FROM patients");
+        $connection = Database::connect();
+        $stmt = $connection->query("select * from patients");
         $patients = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo "\n=== Patient List ===\n";
         foreach ($patients as $patient) {
@@ -133,7 +167,8 @@ class Doctors
 {
     public function handleDoctors()
     {
-        global $connection;
+        $connection = Database::connect();
+
         while (true) {
             echo "\n=== Doctor Management ===\n";
             echo "1. List all doctors\n";
@@ -147,7 +182,7 @@ class Doctors
 
             switch ($choice) {
                 case '1':
-                    $stmt = $connection->query("SELECT * FROM doctors");
+                    $stmt = $connection->query("select * from doctors");
                     $doctors = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     echo "\n=== Doctors List ===\n";
                     foreach ($doctors as $doctor) {
@@ -175,7 +210,7 @@ class Doctors
                     }
 
                     try {
-                        $sql = "INSERT INTO doctors (first_name, last_name, specialization, phone_number, email) VALUES (?, ?, ?, ?, ?)";
+                        $sql = "insert into doctors (first_name, last_name, specialization, phone_number, email) values (?, ?, ?, ?, ?)";
                         $stmt = $connection->prepare($sql);
                         $stmt->execute([$fname, $lname, $spec, $phone, $email]);
                         echo "Doctor added\n";
@@ -202,7 +237,8 @@ class Departments
 {
     public function handleDepartments()
     {
-        global $connection;
+        $connection = Database::connect();
+
         while (true) {
             echo "\n=== Department Management ===\n";
             echo "1. List departments\n";
@@ -213,7 +249,7 @@ class Departments
 
             switch ($choice) {
                 case '1':
-                    $stmt = $connection->query("SELECT * FROM departments");
+                    $stmt = $connection->query("select * from departments");
                     $departments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     echo "\n=== Departments List ===\n";
                     foreach ($departments as $department) {
@@ -231,7 +267,7 @@ class Departments
                     }
 
                     try {
-                        $sql = "INSERT INTO departments (department_name, location) VALUES (?, ?)";
+                        $sql = "insert into departments (department_name, location) values (?, ?)";
                         $stmt = $connection->prepare($sql);
                         $stmt->execute([$name, $location]);
                         echo "Department added\n";
