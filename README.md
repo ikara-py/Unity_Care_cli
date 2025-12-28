@@ -16,7 +16,6 @@ Following the development of the procedural web version of Unity Care Clinic, th
 * **Structure:** Implement Encapsulation, Inheritance, and Interfaces.
 * **Data Access:** Use `MySQLi` with an OOP approach.
 * **Interaction:** Build an interactive console menu for CRUD operations.
-* **Analytics:** Generate statistics using static methods.
 
 ---
 
@@ -24,11 +23,11 @@ Following the development of the procedural web version of Unity Care Clinic, th
 
 ### 1. Class Structure
 The project is built on a hierarchy of business classes:
-* **BaseModel:** Abstract class handling generic DB operations (`save`, `delete`, `findById`).
+* **BaseModel:** Abstract class handling generic DB operations (`save`, `delete`, `find by name`).
 * **Personne:** Abstract parent class.
 * **User:** Parent class for system users.
-* **Patient:** Extends `Personne`.
-* **Doctor:** Extends `User`.
+* **Patient:** Extends `Person`.
+* **Doctor:** Extends `Person`.
 * **Department:** Manages clinic departments.
 
 ### 2. Core Utilities
@@ -56,12 +55,12 @@ Real-time calculation of key metrics:
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/ikara-py/Unity_Care_cli](https://github.com/ikara-py/Unity_Care_cli)
+    git clone https://github.com/ikara-py/Unity_Care_cli
     ```
 
 2.  **Database Setup:**
     * Import the provided SQL file into your MySQL database.
-    * Configure connection settings in `Config/Database.php`.
+    * Configure connection settings in `config/connection.php`.
 
 ---
 
@@ -73,7 +72,6 @@ The application uses a numbered menu system.
 1.  **Manage Patients** (Create, List, Search, Update, Delete)
 2.  **Manage Doctors** (Create, List, Search, Update, Delete)
 3.  **Manage Departments** (Create, List, Update, Delete)
-4.  **Statistics** (View clinic analytics)
 5.  **Exit**
 
 **Example Output (ASCII Table):**
